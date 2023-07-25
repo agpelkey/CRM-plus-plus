@@ -34,8 +34,8 @@ type User struct {
 func (u userStore) Create(ctx context.Context, user *clients.User) error {
 	query := `
 		INSERT INTO users(first_name, last_name, phone_number, email, activated)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id
+		VALUES (@first_name, @last_name, @phone_number, @email, @activated)
+		RETURNING id, created_at
 	`
 
 	//args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email, user.Actived}

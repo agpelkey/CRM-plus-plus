@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/agpelkey/clients"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,18 +18,9 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *Logger
-}
-
-type User struct {
-	ID          int       `json:"id"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	PhoneNumber string    `json:"phone_number"`
-	Email       string    `json:"email"`
-	Active      bool      `json:"-"`
-	CreatedAt   time.Time `json:"-"`
+	config     config
+	logger     *Logger
+	UsersStore clients.UserService
 }
 
 func main() {

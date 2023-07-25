@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -45,7 +46,7 @@ type UserCreate struct {
 
 // UserService is an interface for managing clients
 type UserService interface {
-	// fill in here
+	Create(ctx context.Context, user *User) error
 }
 
 // Validate is called upon POST requests
