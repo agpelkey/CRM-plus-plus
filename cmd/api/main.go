@@ -19,7 +19,6 @@ type config struct {
 type application struct {
 	config config
 	logger *Logger
-	DB     UserStorage
 }
 
 type User struct {
