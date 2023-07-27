@@ -14,6 +14,7 @@ func (app *application) logError(r *http.Request, err error) {
 	})
 }
 
+
 func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }

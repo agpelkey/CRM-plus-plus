@@ -2,9 +2,12 @@ package postgres
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/agpelkey/clients"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -19,22 +22,11 @@ func NewUserStore(db *pgxpool.Pool) userStore {
 }
 
 /*
-type User struct {
-	ID          int       `json:"id"`
-	FirstName   string    `json:"first_name"`
-	LastName    string    `json:"last_name"`
-	PhoneNumber string    `json:"phone_number"`
-	Email       string    `json:"email"`
-	Actived     bool      `json:"-"`
-	CreatedAt   time.Time `json:"-"`
-}
-*/
-
 // Create creates a new user
 func (u userStore) Create(ctx context.Context, user *clients.User) error {
 	query := `
-		INSERT INTO users(first_name, last_name, phone_number, email, activated)
-		VALUES (@first_name, @last_name, @phone_number, @email, @activated)
+		INSERT INTO users(first_name, last_name, phone_number, email)
+		VALUES (@first_name, @last_name, @phone_number, @email)
 		RETURNING id, created_at
 	`
 
@@ -44,14 +36,44 @@ func (u userStore) Create(ctx context.Context, user *clients.User) error {
 		"last_name":    &user.LastName,
 		"phone_number": &user.PhoneNumber,
 		"email":        &user.Email,
-		"activated":    &user.Actived,
 	}
 
 	err := u.db.QueryRow(ctx, query, args).Scan(&user.ID)
 	if err != nil {
-		return err
+        fmt.Println(err)
 	}
 
 	return nil
 
 }
+*/
+
+func (u userStore) Create(user *clients.User) error {
+    query := `INSERT INTO users(first_name, last_name, phone_number, email)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, created_at`
+
+
+    args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email}
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    err := u.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.CreatedAt)
+    if err != nil {
+        var pgErr *pgconn.PgError
+        if errors.As(err, &pgErr) {
+            fmt.Println(pgErr.Message)
+            fmt.Println(pgErr.Code)
+        }
+    }
+
+    return nil
+}
+
+
+
+
+
+
+

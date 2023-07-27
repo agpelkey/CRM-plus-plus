@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/agpelkey/clients"
+	"github.com/agpelkey/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -43,10 +44,13 @@ func main() {
 	}
 	defer dbpool.Close()
 
+    logger.PrintInfo("db connection established", nil)
+
 	// create application
 	app := &application{
 		config: cfg,
 		logger: logger,
+        UsersStore: postgres.NewUserStore(dbpool),
 	}
 
 	srv := &http.Server{
