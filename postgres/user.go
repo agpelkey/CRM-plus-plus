@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/agpelkey/clients"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -21,32 +22,6 @@ func NewUserStore(db *pgxpool.Pool) userStore {
 	return userStore{db: db}
 }
 
-/*
-// Create creates a new user
-func (u userStore) Create(ctx context.Context, user *clients.User) error {
-	query := `
-		INSERT INTO users(first_name, last_name, phone_number, email)
-		VALUES (@first_name, @last_name, @phone_number, @email)
-		RETURNING id, created_at
-	`
-
-	//args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email, user.Actived}
-	args := pgx.NamedArgs{
-		"first_name":   &user.FirstName,
-		"last_name":    &user.LastName,
-		"phone_number": &user.PhoneNumber,
-		"email":        &user.Email,
-	}
-
-	err := u.db.QueryRow(ctx, query, args).Scan(&user.ID)
-	if err != nil {
-        fmt.Println(err)
-	}
-
-	return nil
-
-}
-*/
 
 func (u userStore) Create(user *clients.User) error {
     query := `INSERT INTO users(first_name, last_name, phone_number, email)
@@ -71,8 +46,76 @@ func (u userStore) Create(user *clients.User) error {
     return nil
 }
 
+func (u userStore) GetAll() ([]*clients.User, error) {
+    query := `
+        SELECT id, first_name, last_name, phone_number, email 
+        FROM users
+        ORDER BY first_name`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    rows, err := u.db.Query(ctx, query)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var users []*clients.User
+
+    for rows.Next() {
+        var u clients.User
+        err := rows.Scan(
+            &u.ID,
+            &u.FirstName,
+            &u.LastName,
+            &u.PhoneNumber,
+            &u.Email,
+        )
+        if err != nil {
+            return nil, err
+        }
+
+        users = append(users, &u)
+    }
+
+    return users, nil
+}
+
+// for future authentication
+func (u userStore) GetUserByLastName(ctx context.Context, lastName string) (clients.User, error) {
+    user, err := u.List(ctx, clients.UserFilter{LastName: lastName})
+    if err != nil {
+        return clients.User{}, nil
+    }
+
+    return user[0], nil
+}
 
 
+func (u userStore) List(ctx context.Context, filter clients.UserFilter) ([]clients.User, error) {
+    query := `
+    SELECT id, first_name, last_name, phone_number
+    FROM users
+    where 1=1
+    `
+
+    rows, err := u.db.Query(ctx, query)
+    if err != nil {
+        return nil, fmt.Errorf("failed to query list users: %v", err)
+    }
+
+    users, err := pgx.CollectRows(rows, pgx.RowToStructByName[clients.User])
+    if err != nil {
+        return nil, fmt.Errorf("failed to scan rows of users: %v", err)
+    }
+    
+    if len(users) == 0 {
+        return nil, clients.ErrNoUsersFound
+    }
+
+    return users, nil
+}
 
 
 

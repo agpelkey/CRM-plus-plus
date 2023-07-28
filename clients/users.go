@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -15,6 +16,8 @@ var (
 	errEmailTooLong  = errors.New("email length is too long")
 	errEmailInvalid  = errors.New("email is not valid")
     ErrDuplicateEmail = errors.New("email already exists")
+
+    ErrNoUsersFound = errors.New("no users were found")
 )
 
 type User struct {
@@ -43,9 +46,17 @@ type UserCreate struct {
 	Email       string `json:"email"`
 }
 
+type UserFilter struct {
+    ID int `json:"id"`
+    Email string `json:"email"`
+    LastName string `json:"last_name"`
+}
+
 // UserService is an interface for managing clients
 type UserService interface {
-    Create(user*User) error
+    Create(user *User) error
+    GetAll() ([]*User, error)
+    List(ctx context.Context, filter UserFilter) ([]User, error)
 }
 
 // Validate is called upon POST requests

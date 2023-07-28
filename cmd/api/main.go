@@ -4,9 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
-	"time"
 
 	"github.com/agpelkey/clients"
 	"github.com/agpelkey/postgres"
@@ -53,22 +51,8 @@ func main() {
         UsersStore: postgres.NewUserStore(dbpool),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.config.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
-
-	app.logger.PrintInfo("starting server", map[string]string{
-		"Addr": srv.Addr,
-		"env":  app.config.env,
-	})
-
-	err = srv.ListenAndServe()
-	if err != nil {
-		logger.PrintFatal(err, nil)
-	}
-
+    err = app.server()
+    if err != nil {
+        logger.PrintFatal(err, nil)
+    }
 }
