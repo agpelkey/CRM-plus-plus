@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+
 )
 
 var (
@@ -18,6 +19,7 @@ var (
     ErrDuplicateEmail = errors.New("email already exists")
 
     ErrNoUsersFound = errors.New("no users were found")
+    ErrRecordNotFound = errors.New("record not found")
 )
 
 type User struct {
@@ -35,9 +37,11 @@ type WrapUser struct {
 }
 
 // WrapUserList wraps list of users for representation
+/*
 type WrapUserList struct {
 	User []User `json:"users"`
 }
+*/
 
 type UserCreate struct {
 	FirstName   string `json:"first_name"`
@@ -56,6 +60,7 @@ type UserFilter struct {
 type UserService interface {
     Create(user *User) error
     GetAll() ([]*User, error)
+    GetUserByID(id int64) (*User, error)
     List(ctx context.Context, filter UserFilter) ([]User, error)
 }
 

@@ -11,6 +11,7 @@ func (app *application) routes() http.Handler {
 
     router.HandlerFunc(http.MethodPost, "/v1/users", app.handleCreateUser)
     router.HandlerFunc(http.MethodGet, "/v1/users", app.handleGetAllUsers)
+    router.HandlerFunc(http.MethodGet, "/v1/users/:id", app.handleGetUserByID)
 
 	return router
 

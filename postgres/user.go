@@ -82,6 +82,35 @@ func (u userStore) GetAll() ([]*clients.User, error) {
     return users, nil
 }
 
+func (u userStore) GetUserByID(id int64) (*clients.User, error) {
+
+    query := `SELECT first_name, last_name, phone_number, email FROM users WHERE id = $1`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+    
+    var user clients.User
+
+    err := u.db.QueryRow(ctx, query, id).Scan(
+        user.FirstName,
+        user.LastName,
+        user.PhoneNumber,
+        user.Email,
+    )
+
+    if err != nil {
+        var pgErr *pgconn.PgError
+        switch {
+        case errors.Is(err, clients.ErrNoUsersFound):
+            return nil, fmt.Errorf(pgErr.Message)
+        default:
+            return nil, err 
+        }
+    }
+
+    return &user, nil
+}
+
 // for future authentication
 func (u userStore) GetUserByLastName(ctx context.Context, lastName string) (clients.User, error) {
     user, err := u.List(ctx, clients.UserFilter{LastName: lastName})
