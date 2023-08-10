@@ -62,6 +62,8 @@ type UserService interface {
     GetAll() ([]*User, error)
     GetUserByID(id int64) (*User, error)
     List(ctx context.Context, filter UserFilter) ([]User, error)
+    DeleteUser(id int64) error
+    UpdateUser(user *User) (*User, error) 
 }
 
 // Validate is called upon POST requests

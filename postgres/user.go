@@ -23,6 +23,7 @@ func NewUserStore(db *pgxpool.Pool) userStore {
 }
 
 
+// create a new user entry in the database
 func (u userStore) Create(user *clients.User) error {
     query := `INSERT INTO users(first_name, last_name, phone_number, email)
             VALUES ($1, $2, $3, $4)
@@ -46,6 +47,7 @@ func (u userStore) Create(user *clients.User) error {
     return nil
 }
 
+// get a list of all users from the database
 func (u userStore) GetAll() ([]*clients.User, error) {
     query := `
         SELECT id, first_name, last_name, phone_number, email 
@@ -82,6 +84,7 @@ func (u userStore) GetAll() ([]*clients.User, error) {
     return users, nil
 }
 
+// get user by ID from database
 func (u userStore) GetUserByID(id int64) (*clients.User, error) {
 
     query := `SELECT first_name, last_name, phone_number, email FROM users WHERE id = $1`
@@ -110,6 +113,68 @@ func (u userStore) GetUserByID(id int64) (*clients.User, error) {
 
     return &user, nil
 }
+
+// update a user entry in the database
+func (u userStore) UpdateUser(user *clients.User) (*clients.User, error) {
+    query := `
+        Update users
+        Set first_name = COALESCE(@first_name, first_name),
+            last_name = COALESCE(@last_name, last_name),
+            phone_number = COALESCE(@phone_number, phone_number),
+            email = COALESCE(@email, email) 
+            WHERE id = @id RETURNING *'
+    `
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    args := pgx.NamedArgs{
+        "first_name": &user.FirstName,
+        "last_name": &user.LastName,
+        "phone_number": &user.PhoneNumber,
+        "email": &user.Email,
+    }
+
+
+    row, err := u.db.Query(ctx, query, args)
+    if err != nil {
+        fmt.Errorf("failed to query update user: %v", err)
+    }
+
+    client, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
+    if err != nil {
+        switch {
+        case errors.Is(err, pgx.ErrNoRows):
+            return &clients.User{}, err
+        default:
+            return &clients.User{}, fmt.Errorf("failed to scan rows of products: %v", err)
+        }
+    }
+
+    return &client, nil
+}
+
+// delete a user from the database
+func (u userStore) DeleteUser(id int64) error {
+    query := `DELETE FROM users WHERE id = $1`
+
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    payload, err := u.db.Exec(ctx, query, id)
+
+    if err != nil {
+        return fmt.Errorf("failed to delete from users: %v", err) 
+    }
+
+    if rows := payload.RowsAffected(); rows != 1 {
+        return clients.ErrNoUsersFound
+    }
+
+    return nil
+}
+
+
 
 // for future authentication
 func (u userStore) GetUserByLastName(ctx context.Context, lastName string) (clients.User, error) {
