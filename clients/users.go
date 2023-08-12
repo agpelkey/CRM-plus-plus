@@ -80,3 +80,14 @@ func (u UserCreate) Validate() error {
 	}
 	return nil
 }
+
+// used to set input values to a new struct and return a new user.
+// Will mostly be used for POST requests.
+func (u UserCreate) CreateModel() User {
+    return User{
+        FirstName: u.FirstName,
+        LastName: u.LastName,
+        PhoneNumber: u.PhoneNumber,
+        Email: u.Email,
+    }
+}

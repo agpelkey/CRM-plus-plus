@@ -11,12 +11,15 @@ import (
 )
 
 func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request) {
+    /*
 	var input struct {
 		FirstName   string `json:"first_name"`
 		LastName    string `json:"last_name"`
 		PhoneNumber string `json:"phone_number"`
 		Email       string `json:"email"`
 	}
+    */
+    input := clients.UserCreate{}
 
 	err := readJSON(w, r, &input)
 	if err != nil {
@@ -24,14 +27,16 @@ func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user := &clients.User{
-		FirstName:   input.FirstName,
-		LastName:    input.LastName,
-		PhoneNumber: input.PhoneNumber,
-		Email:       input.Email,
-	}
+    err = input.Validate()
+    if err != nil {
+        app.badRequestResponse(w, r, err)    
+        return
+    }
 
-	err = app.UsersStore.Create(user)
+
+    user := input.CreateModel()
+
+	err = app.UsersStore.Create(&user)
 	if err != nil {
         app.serverErrorResponse(w, r, err)
         return
@@ -41,6 +46,10 @@ func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request)
 	headers.Set("Location", fmt.Sprintf("/v1/user/%d", user.ID))
 
 	err = writeJSON(w, http.StatusCreated, envelope{"user": user}, headers)
+    if err != nil {
+        app.serverErrorResponse(w, r, err)
+        return
+    }
 
 }
 
