@@ -11,14 +11,7 @@ import (
 )
 
 func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request) {
-    /*
-	var input struct {
-		FirstName   string `json:"first_name"`
-		LastName    string `json:"last_name"`
-		PhoneNumber string `json:"phone_number"`
-		Email       string `json:"email"`
-	}
-    */
+
     input := clients.UserCreate{}
 
 	err := readJSON(w, r, &input)

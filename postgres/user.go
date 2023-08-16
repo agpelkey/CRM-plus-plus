@@ -27,7 +27,7 @@ func NewUserStore(db *pgxpool.Pool) userStore {
 func (u userStore) Create(user *clients.User) error {
     query := `INSERT INTO users(first_name, last_name, phone_number, email)
             VALUES ($1, $2, $3, $4)
-            RETURNING id, created_at`
+            RETURNING id`
 
 
     args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email}
@@ -35,7 +35,7 @@ func (u userStore) Create(user *clients.User) error {
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
-    err := u.db.QueryRow(ctx, query, args...).Scan(&user.ID, &user.CreatedAt)
+    err := u.db.QueryRow(ctx, query, args...).Scan(&user.ID) 
     if err != nil {
         var pgErr *pgconn.PgError
         if errors.As(err, &pgErr) {
@@ -50,7 +50,7 @@ func (u userStore) Create(user *clients.User) error {
 // get a list of all users from the database
 func (u userStore) GetAll() ([]*clients.User, error) {
     query := `
-        SELECT id, first_name, last_name, phone_number, email 
+        SELECT id, first_name, last_name, phone_number, email, follow_up, check_in_date 
         FROM users
         ORDER BY first_name`
 
@@ -73,6 +73,8 @@ func (u userStore) GetAll() ([]*clients.User, error) {
             &u.LastName,
             &u.PhoneNumber,
             &u.Email,
+            &u.FollowUp,
+            &u.CheckInDate,
         )
         if err != nil {
             return nil, err

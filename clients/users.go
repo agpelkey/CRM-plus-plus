@@ -28,7 +28,8 @@ type User struct {
 	LastName    string    `json:"last_name"`
 	PhoneNumber string    `json:"phone_number"`
 	Email       string    `json:"email"`
-	CreatedAt   time.Time `json:"-"`
+    FollowUp    bool      `json:"follow_up"`
+    CheckInDate time.Time `json:"check_in_date"`
 }
 
 // WrapUser wraps user for user representation
@@ -48,6 +49,7 @@ type UserCreate struct {
 	LastName    string `json:"last_name"`
 	PhoneNumber string `json:"phone_number"`
 	Email       string `json:"email"`
+    //FollowUp    bool   `json:"follow_up"`
 }
 
 type UserFilter struct {
@@ -89,5 +91,6 @@ func (u UserCreate) CreateModel() User {
         LastName: u.LastName,
         PhoneNumber: u.PhoneNumber,
         Email: u.Email,
+        //FollowUp: u.Fol,
     }
 }
