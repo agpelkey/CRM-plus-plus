@@ -97,10 +97,10 @@ func (u userStore) GetUserByID(id int64) (*clients.User, error) {
     var user clients.User
 
     err := u.db.QueryRow(ctx, query, id).Scan(
-        user.FirstName,
-        user.LastName,
-        user.PhoneNumber,
-        user.Email,
+        &user.FirstName,
+        &user.LastName,
+        &user.PhoneNumber,
+        &user.Email,
     )
 
     if err != nil {
@@ -117,43 +117,42 @@ func (u userStore) GetUserByID(id int64) (*clients.User, error) {
 }
 
 // update a user entry in the database
-func (u userStore) UpdateUser(user *clients.User) (*clients.User, error) {
+func (u userStore) UpdateUser(user *clients.User) error {
     query := `
-        Update users
-        Set first_name = COALESCE(@first_name, first_name),
-            last_name = COALESCE(@last_name, last_name),
-            phone_number = COALESCE(@phone_number, phone_number),
-            email = COALESCE(@email, email) 
-            WHERE id = @id RETURNING *'
+        UPDATE users
+        SET first_name = $1, last_name = $2, phone_number = $3, email = $4
+        WHERE id = $5
     `
 
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
     defer cancel()
 
     args := pgx.NamedArgs{
-        "first_name": &user.FirstName,
-        "last_name": &user.LastName,
+        "first_name":   &user.FirstName,
+        "last_name":    &user.LastName,
         "phone_number": &user.PhoneNumber,
-        "email": &user.Email,
+        "email":        &user.Email,
     }
 
 
-    row, err := u.db.Query(ctx, query, args)
+    err := u.db.QueryRow(ctx, query, args)
     if err != nil {
-        fmt.Errorf("failed to query update user: %v", err)
+        return fmt.Errorf("failed to query update user: %v", err)
     }
 
-    client, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
+    /*
+    _, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
     if err != nil {
         switch {
         case errors.Is(err, pgx.ErrNoRows):
-            return &clients.User{}, err
+            return err
         default:
-            return &clients.User{}, fmt.Errorf("failed to scan rows of products: %v", err)
+            return fmt.Errorf("failed to scan rows of products: %v", err)
         }
     }
+    */
 
-    return &client, nil
+    return nil
 }
 
 // delete a user from the database

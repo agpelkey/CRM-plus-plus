@@ -75,14 +75,14 @@ func (app *application) handleGetUserByID(w http.ResponseWriter, r *http.Request
         return
     }
 
-    headers := make(http.Header)
-    headers.Set("Location", fmt.Sprintf("v1/users/%d", user.ID))
+    //headers := make(http.Header)
+    //headers.Set("Location", fmt.Sprintf("v1/users/%d", user.ID))
 
-    err = writeJSON(w, http.StatusOK, envelope{"users":user}, headers)
+    err = writeJSON(w, http.StatusOK, envelope{"users":user}, nil)
         
 }
 
-// handleUpdateUser handles the "PATCH /v1/users/edit/:id" route. This route
+// handleUpdateUser handles the "PUT /v1/users/edit/:id" route. This route
 // reads in the updated fiels and issue an update in the database.
 func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 
@@ -105,13 +105,13 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
         return
     }
     
-    // delcate input struct to read request into
     var input struct {
-        FirstName string `json:"first_name"`
-        LastName string `json:"last_name"`
-        PhoneNumber string `json:"phone_number"`
-        Email string `json:"email"`
+        FirstName   *string `json:"first_name"`
+        LastName    *string `json:"last_name"`
+        PhoneNumber *string `json:"phone_number"`
+        Email       *string `json:"email"`
     }
+
 
     err = readJSON(w, r, &input)
     if err != nil {
@@ -119,13 +119,30 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
         return
     }
 
+    if input.FirstName != nil {
+        user.FirstName = *input.FirstName
+    }
+
+    if input.LastName != nil {
+        user.LastName = *input.LastName
+    }
+
+    if input.PhoneNumber!= nil {
+        user.PhoneNumber= *input.PhoneNumber
+    }
+
+    if input.Email!= nil {
+        user.Email = *input.Email
+    }
+    /*
     user.FirstName = input.FirstName    
     user.LastName= input.LastName
     user.PhoneNumber= input.PhoneNumber
     user.Email = input.Email
+    */
 
 
-    result, err := app.UsersStore.UpdateUser(user)
+    result := app.UsersStore.UpdateUser(user)
     if err != nil {
        app.serverErrorResponse(w, r, err) 
        return
