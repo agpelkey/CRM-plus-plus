@@ -52,6 +52,13 @@ type UserCreate struct {
     //FollowUp    bool   `json:"follow_up"`
 }
 
+type UserUpdate struct {
+	FirstName   *string `json:"first_name"`
+	LastName    *string `json:"last_name"`
+	PhoneNumber *string `json:"phone_number"`
+	Email       *string `json:"email"`
+}
+
 type UserFilter struct {
     ID int `json:"id"`
     Email string `json:"email"`
@@ -65,7 +72,7 @@ type UserService interface {
     GetUserByID(id int64) (*User, error)
     List(ctx context.Context, filter UserFilter) ([]User, error)
     DeleteUser(id int64) error
-    UpdateUser(user *User) error
+    UpdateUser(id int64, user UserUpdate) error
 }
 
 // Validate is called upon POST requests

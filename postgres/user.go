@@ -117,11 +117,22 @@ func (u userStore) GetUserByID(id int64) (*clients.User, error) {
 }
 
 // update a user entry in the database
-func (u userStore) UpdateUser(user *clients.User) error {
+func (u userStore) UpdateUser(id int64, user clients.UserUpdate) error {
+    /*
     query := `
         UPDATE users
         SET first_name = $1, last_name = $2, phone_number = $3, email = $4
         WHERE id = $5
+    `
+    */
+
+    query := `
+        UPDATE users 
+        SET first_name = COALESCE(@first_name, first_name),
+            last_name = COALESCE(@last_name, last_name),
+            phone_number = COALESCE(@phone_number, phone_number),
+            email = COALESCE(@email, email)
+        WHERE id = @id
     `
 
     ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -132,23 +143,20 @@ func (u userStore) UpdateUser(user *clients.User) error {
         "last_name":    &user.LastName,
         "phone_number": &user.PhoneNumber,
         "email":        &user.Email,
+        "id":           &id,
     }
 
+    //args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email, user.ID}
 
-    err := u.db.QueryRow(ctx, query, args)
+    _, err := u.db.Query(ctx, query, args)
     if err != nil {
-        return fmt.Errorf("failed to query update user: %v", err)
+        return fmt.Errorf("failed to query update client: %v", err)
     }
 
     /*
-    _, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
+    client, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
     if err != nil {
-        switch {
-        case errors.Is(err, pgx.ErrNoRows):
-            return err
-        default:
-            return fmt.Errorf("failed to scan rows of products: %v", err)
-        }
+        return clients.User{}, fmt.Errorf("failed to scan rows of product: %v", err)
     }
     */
 

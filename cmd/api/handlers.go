@@ -94,6 +94,7 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
 
     // fetch existing record from database to edit, sending a 404 not found if 
     // we could not find matching record
+    /*
     user, err := app.UsersStore.GetUserByID(id)
     if err != nil {
         switch {
@@ -104,21 +105,16 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
         }
         return
     }
+    */
     
-    var input struct {
-        FirstName   *string `json:"first_name"`
-        LastName    *string `json:"last_name"`
-        PhoneNumber *string `json:"phone_number"`
-        Email       *string `json:"email"`
-    }
-
-
+    input := clients.UserUpdate{}
     err = readJSON(w, r, &input)
     if err != nil {
         app.serverErrorResponse(w, r, err)
         return
     }
 
+    /*
     if input.FirstName != nil {
         user.FirstName = *input.FirstName
     }
@@ -141,14 +137,15 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
     user.Email = input.Email
     */
 
+    //fmt.Println(user)
 
-    result := app.UsersStore.UpdateUser(user)
+    err = app.UsersStore.UpdateUser(id, input)
     if err != nil {
        app.serverErrorResponse(w, r, err) 
        return
     }
 
-    err = writeJSON(w, http.StatusOK, envelope{"user": result}, nil)
+    err = writeJSON(w, http.StatusOK, envelope{"user": err}, nil)
     if err != nil {
         app.serverErrorResponse(w, r, err)
         return 
