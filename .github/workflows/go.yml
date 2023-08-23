@@ -22,7 +22,6 @@ jobs:
         go-version: '1.19'
     - name: Install dependencies
       run: |
-        go get .
         go get github.com/jackc/pgx/v5@v5.4.2
         go get github.com/julienschmidt/httprouter@v1.3.0
       
