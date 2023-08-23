@@ -1,7 +1,6 @@
 package clients
 
 import (
-	"context"
 	"errors"
 	"time"
 

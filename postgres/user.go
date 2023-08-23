@@ -170,7 +170,8 @@ func (u userStore) DeleteUser(id int64) error {
 
 
 
-// for future authentication
+// Still deciding if I want to include this fucntionality at a later date or not 
+/*
 func (u userStore) GetUserByLastName(ctx context.Context, lastName string) (clients.User, error) {
     user, err := u.List(ctx, clients.UserFilter{LastName: lastName})
     if err != nil {
@@ -204,7 +205,7 @@ func (u userStore) List(ctx context.Context, filter clients.UserFilter) ([]clien
 
     return users, nil
 }
-
+*/
 
 
 
