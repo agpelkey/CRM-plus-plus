@@ -23,6 +23,7 @@ func NewUserStore(db *pgxpool.Pool) userStore {
 }
 
 
+// testing CI
 // create a new user entry in the database
 func (u userStore) Create(user *clients.User) error {
     query := `INSERT INTO users(first_name, last_name, phone_number, email)
