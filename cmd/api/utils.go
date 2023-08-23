@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// function to write JSON back to the client
 func writeJSON(w http.ResponseWriter, status int, data envelope, header http.Header) error {
 	// Encode the data to json, returning the error if there is one
 	js, err := json.Marshal(data)
@@ -28,6 +29,7 @@ func writeJSON(w http.ResponseWriter, status int, data envelope, header http.Hea
 	return nil
 }
 
+// funtion to read JSON coming from the request
 func readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
 	maxBytes := 1024 * 1024 // one megabyte
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))

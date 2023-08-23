@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Method to handle POST requests and create new users
 func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 
     input := clients.UserCreate{}
@@ -46,6 +47,7 @@ func (app *application) handleCreateUser(w http.ResponseWriter, r *http.Request)
 
 }
 
+// Method to get all users from database
 func (app *application) handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
     users, err := app.UsersStore.GetAll()
     if err != nil {
@@ -56,6 +58,7 @@ func (app *application) handleGetAllUsers(w http.ResponseWriter, r *http.Request
     _ = writeJSON(w, http.StatusOK, envelope{"users": users}, nil)
 }
 
+// Method to get user by ID
 func (app *application) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
     
     id, err := app.readIDParam(r)
@@ -75,15 +78,12 @@ func (app *application) handleGetUserByID(w http.ResponseWriter, r *http.Request
         return
     }
 
-    //headers := make(http.Header)
-    //headers.Set("Location", fmt.Sprintf("v1/users/%d", user.ID))
-
     err = writeJSON(w, http.StatusOK, envelope{"users":user}, nil)
         
 }
 
-// handleUpdateUser handles the "PUT /v1/users/edit/:id" route. This route
-// reads in the updated fiels and issue an update in the database.
+// handleUpdateUser handles the "PATCH /v1/users/:id" route. This route
+// reads in the updated fields and issues an update in the database.
 func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 
     id, err := app.readIDParam(r)
@@ -91,21 +91,6 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
         app.notFoundResponse(w, r)
         return
     }
-
-    // fetch existing record from database to edit, sending a 404 not found if 
-    // we could not find matching record
-    /*
-    user, err := app.UsersStore.GetUserByID(id)
-    if err != nil {
-        switch {
-        case errors.Is(err, clients.ErrRecordNotFound):
-            app.notFoundResponse(w, r)
-        default:
-            app.serverErrorResponse(w, r, err)
-        }
-        return
-    }
-    */
     
     input := clients.UserUpdate{}
     err = readJSON(w, r, &input)
@@ -114,30 +99,6 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
         return
     }
 
-    /*
-    if input.FirstName != nil {
-        user.FirstName = *input.FirstName
-    }
-
-    if input.LastName != nil {
-        user.LastName = *input.LastName
-    }
-
-    if input.PhoneNumber!= nil {
-        user.PhoneNumber= *input.PhoneNumber
-    }
-
-    if input.Email!= nil {
-        user.Email = *input.Email
-    }
-    /*
-    user.FirstName = input.FirstName    
-    user.LastName= input.LastName
-    user.PhoneNumber= input.PhoneNumber
-    user.Email = input.Email
-    */
-
-    //fmt.Println(user)
 
     err = app.UsersStore.UpdateUser(id, input)
     if err != nil {
@@ -152,6 +113,7 @@ func (app *application) handleUpdateUser(w http.ResponseWriter, r *http.Request)
     }
 }
 
+// Method to handle DELETE requests from client
 func (app *application) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
   
     id, err := app.readIDParam(r)
@@ -177,9 +139,13 @@ func (app *application) handleDeleteUser(w http.ResponseWriter, r *http.Request)
 
 }
 
+// still playing around with this
+/*
 func (app *application) handleGetUserByLastName(w http.ResponseWriter, r *http.Request) {
 }
+*/
 
+// function to get ID from url 
 func (app *application) readIDParam(r *http.Request) (int64, error) {
     params := httprouter.ParamsFromContext(r.Context())
 

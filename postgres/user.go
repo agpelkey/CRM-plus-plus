@@ -118,13 +118,6 @@ func (u userStore) GetUserByID(id int64) (*clients.User, error) {
 
 // update a user entry in the database
 func (u userStore) UpdateUser(id int64, user clients.UserUpdate) error {
-    /*
-    query := `
-        UPDATE users
-        SET first_name = $1, last_name = $2, phone_number = $3, email = $4
-        WHERE id = $5
-    `
-    */
 
     query := `
         UPDATE users 
@@ -146,19 +139,11 @@ func (u userStore) UpdateUser(id int64, user clients.UserUpdate) error {
         "id":           &id,
     }
 
-    //args := []interface{}{user.FirstName, user.LastName, user.PhoneNumber, user.Email, user.ID}
 
     _, err := u.db.Query(ctx, query, args)
     if err != nil {
         return fmt.Errorf("failed to query update client: %v", err)
     }
-
-    /*
-    client, err := pgx.CollectOneRow(row, pgx.RowToStructByName[clients.User])
-    if err != nil {
-        return clients.User{}, fmt.Errorf("failed to scan rows of product: %v", err)
-    }
-    */
 
     return nil
 }

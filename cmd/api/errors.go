@@ -29,6 +29,7 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	}
 }
 
+// Will be used when the application encounters an error at run time.
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	log.Println(r, err)
 
@@ -36,6 +37,7 @@ func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Reque
 	app.errorResponse(w, r, http.StatusInternalServerError, message)
 }
 
+// Method used to send 404 Not Found back to client
 func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request) {
     message := "the requested resource could not be found"
     app.errorResponse(w, r, http.StatusNotFound, message)
