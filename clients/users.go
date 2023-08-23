@@ -22,6 +22,7 @@ var (
     ErrRecordNotFound = errors.New("record not found")
 )
 
+// Custom user type
 type User struct {
 	ID          int       `json:"id"`
 	FirstName   string    `json:"first_name"`
@@ -32,18 +33,7 @@ type User struct {
     CheckInDate time.Time `json:"check_in_date"`
 }
 
-// WrapUser wraps user for user representation
-type WrapUser struct {
-	User User `json:"user"`
-}
-
-// WrapUserList wraps list of users for representation
-/*
-type WrapUserList struct {
-	User []User `json:"users"`
-}
-*/
-
+// Custome data type to represent POST requests
 type UserCreate struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
@@ -52,6 +42,7 @@ type UserCreate struct {
     //FollowUp    bool   `json:"follow_up"`
 }
 
+// Custom data type to represent PATCH requests
 type UserUpdate struct {
 	FirstName   *string `json:"first_name"`
 	LastName    *string `json:"last_name"`
@@ -59,18 +50,13 @@ type UserUpdate struct {
 	Email       *string `json:"email"`
 }
 
-type UserFilter struct {
-    ID int `json:"id"`
-    Email string `json:"email"`
-    LastName string `json:"last_name"`
-}
 
 // UserService is an interface for managing clients
 type UserService interface {
     Create(user *User) error
     GetAll() ([]*User, error)
     GetUserByID(id int64) (*User, error)
-    List(ctx context.Context, filter UserFilter) ([]User, error)
+    //List(ctx context.Context, filter UserFilter) ([]User, error)
     DeleteUser(id int64) error
     UpdateUser(id int64, user UserUpdate) error
 }
