@@ -6,7 +6,7 @@ API to handle client managemenet for my girlfriend's real estate business.
 - [X] PostgreSql database provider.
 - [X] Dockerized.
 
-## How to run locally
+## How to run
 Clone the repo locally and run:
 ```shell
 $ make run
