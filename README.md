@@ -3,7 +3,7 @@ API to handle client managemenet for my girlfriend's real estate business.
 
 ## Features
 - [X] REST API written with httprouter.
-- [X] PostgresSql database provider.
+- [X] PostgreSql database provider.
 - [X] Dockerized.
 
 ## How to run locally
